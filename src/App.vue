@@ -1,35 +1,60 @@
 <template>
-  <v-stage
-    ref="stage"
-    :config="stageSize"
-    @mousedown="handleStageMouseDown"
-    @touchstart="handleStageMouseDown"
-  >
-    <v-layer ref="layer">
-      <v-group
-        v-for="(templatePiece, index) in triangulo"
-        :key="templatePiece.id"
-      >
-        <v-shape :config="getTemplateShapeConfig(templatePiece)" />
-        <v-text :config="getTemplateTextConfig(templatePiece, index + 1)" />
-      </v-group>
-      <v-shape
-        v-for="piece in userPieces"
-        :key="piece.id"
-        :config="getUserShapeConfig(piece)"
-        @dragend="handleDragEnd"
-      />
-      <v-transformer ref="transformer" :resizeEnabled="false" />
-    </v-layer>
-  </v-stage>
-  <div>
-    <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
+  <div class="contenedor-principal">
+    <!-- Canvas a la izquierda -->
+    <v-stage
+      ref="stage"
+      :config="stageSize"
+      @mousedown="handleStageMouseDown"
+      @touchstart="handleStageMouseDown"
+    >
+      <v-layer ref="layer">
+        <!-- Piezas objetivo -->
+        <v-group
+          v-for="(templatePiece, index) in triangulo"
+          :key="templatePiece.id"
+        >
+          <v-shape :config="getTemplateShapeConfig(templatePiece)" />
+          <v-text :config="getTemplateTextConfig(templatePiece, index + 1)" />
+        </v-group>
+
+        <!-- Piezas del usuario -->
+        <v-shape
+          v-for="piece in userPieces"
+          :key="piece.id"
+          :config="getUserShapeConfig(piece)"
+          @dragend="handleDragEnd"
+        />
+
+        <v-transformer ref="transformer" :resizeEnabled="false" />
+      </v-layer>
+    </v-stage>
+
+    <!-- Info a la derecha -->
+    <div class="panel-lateral">
+      <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
+      <OrdenPiezas :piezas="userPieces" />
+    </div>
   </div>
 </template>
+
+<style scoped>
+.contenedor-principal {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.panel-lateral {
+  width: 250px;
+  padding: 10px;
+  border-left: 2px solid #ccc;
+}
+</style>
 
 <script setup>
 import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "./trianguloABC.js"; // Asegúrate de que la ruta sea correcta
+import OrdenPiezas from "./components/common/OrdenPiezas.vue";
 
 const stageSize = ref({
   width: 900,
@@ -120,7 +145,7 @@ const correctPiecesCount = ref(0);
 
 const templateColor = "gray";
 const templateOpacity = 0.5;
-const positionTolerance = 10;
+const positionTolerance = 2;
 const rotationTolerance = 5;
 
 const getTemplateShapeConfig = (piece) => ({
@@ -273,5 +298,8 @@ const handleStageMouseDown = (e) => {
 .v-stage {
   outline: 2px solid black;
   border: 1px solid #ccc;
+}
+p {
+  padding-top: 5px;
 }
 </style>
