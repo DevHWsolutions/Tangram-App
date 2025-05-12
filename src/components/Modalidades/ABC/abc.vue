@@ -33,6 +33,14 @@
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
       <OrdenPiezas :piezas="userPieces" />
+      <EstadoJuego
+        ref="estadoJuego"
+        :totalPiezas="triangulo.length"
+        :piezasCorrectas="correctPiecesCount"
+        :intentosIniciales="6"
+        :duracion="60"
+        @finalizado="manejarFinJuego"
+      />
     </div>
   </div>
 </template>
@@ -55,7 +63,17 @@
 import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "../../../trianguloABC.js"; // Asegúrate de que la ruta sea correcta
 import OrdenPiezas from "../../common/OrdenPiezas.vue";
+import EstadoJuego from "../../common/EstadoJuego.vue";
 
+const estadoJuego = ref(null);
+
+function manejarFinJuego(resultado) {
+  if (resultado.gano) {
+    alert("¡Felicidades, ganaste!");
+  } else {
+    alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
+  }
+}
 const stageSize = ref({
   width: 900,
   height: 700,
@@ -221,6 +239,8 @@ const handleDragEnd = (e) => {
       console.log(`${draggedPiece.nombre} colocada correctamente.`);
     } else {
       console.log(`${draggedPiece.nombre} colocada incorrectamente.`);
+      // 👇 Aquí restamos un intento si fue incorrecta
+      estadoJuego.value?.perderIntento();
     }
   }
 };

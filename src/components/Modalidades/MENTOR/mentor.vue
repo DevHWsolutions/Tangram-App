@@ -32,7 +32,15 @@
     <!-- Info a la derecha -->
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
-      <OrdenPiezas :piezas="userPieces" />
+      <!-- <OrdenPiezas :piezas="userPieces" /> -->
+      <EstadoJuego
+        ref="estadoJuego"
+        :totalPiezas="triangulo.length"
+        :piezasCorrectas="correctPiecesCount"
+        :intentosIniciales="6"
+        :duracion="60"
+        @finalizado="manejarFinJuego"
+      />
     </div>
   </div>
 </template>
@@ -55,7 +63,9 @@
 import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "../../../BarcoMENTOR.js"; // Asegúrate de que la ruta sea correcta
 import OrdenPiezas from "../../common/OrdenPiezas.vue";
+import EstadoJuego from "../../common/EstadoJuego.vue";
 
+const estadoJuego = ref(null);
 const stageSize = ref({
   width: 900,
   height: 700,
@@ -69,7 +79,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p1").points],
     x: 750,
     y: 220,
-    fill: "skyblue",
+    fill: "#33BEAB",
     rotation: 45,
     draggable: true,
   },
@@ -80,7 +90,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p2").points],
     x: 750,
     y: 90,
-    fill: "orange",
+    fill: "#33BEAB",
     rotation: 45,
     draggable: true,
   },
@@ -91,7 +101,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p3").points],
     x: 700,
     y: 340,
-    fill: "magenta",
+    fill: "#33BEAB",
     rotation: 0,
     draggable: true,
   },
@@ -102,7 +112,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p4").points],
     x: 700,
     y: 440,
-    fill: "lime",
+    fill: "#33BEAB",
     rotation: 315,
     draggable: true,
   },
@@ -113,7 +123,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p5").points],
     x: 700,
     y: 440,
-    fill: "yellow",
+    fill: "#33BEAB",
     rotation: 45,
     draggable: true,
   },
@@ -124,7 +134,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p6").points],
     x: 700,
     y: 520,
-    fill: "blue",
+    fill: "#33BEAB",
     rotation: 45,
     draggable: true,
   },
@@ -135,7 +145,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p7").points],
     x: 700,
     y: 520,
-    fill: "teal",
+    fill: "#33BEAB",
     rotation: 180,
     draggable: true,
   },
@@ -143,7 +153,8 @@ const userPieces = ref([
 const correctPieces = ref({});
 const correctPiecesCount = ref(0);
 
-const templateColor = "gray";
+const templateColor = "#DFB852";
+const dash = [10, 5];
 const templateOpacity = 0.5;
 const positionTolerance = 2;
 const rotationTolerance = 5;
@@ -152,6 +163,7 @@ const getTemplateShapeConfig = (piece) => ({
   x: piece.x,
   y: piece.y,
   fill: templateColor,
+  dash: dash,
   fillOpacity: templateOpacity,
   stroke: "black",
   strokeWidth: 1,
@@ -221,6 +233,8 @@ const handleDragEnd = (e) => {
       console.log(`${draggedPiece.nombre} colocada correctamente.`);
     } else {
       console.log(`${draggedPiece.nombre} colocada incorrectamente.`);
+      // 👇 Aquí restamos un intento si fue incorrecta
+      estadoJuego.value?.perderIntento();
     }
   }
 };
@@ -301,5 +315,10 @@ const handleStageMouseDown = (e) => {
 }
 p {
   padding-top: 5px;
+}
+.contenedor-principal {
+  /* margin: 5em;
+  border: 2px solid black;
+  border-radius: 25px; */
 }
 </style>
