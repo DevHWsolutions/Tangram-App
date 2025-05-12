@@ -4,7 +4,8 @@
       <button @click="currentView = 'abc'">ABC</button>
       <button @click="currentView = 'mentor'">MENTOR</button>
       <button @click="currentView = 'elite'">ELITE</button>
-      <button @click="currentView = 'ConfiguracionDibujos'">
+
+      <button @click="currentView = 'ConfiguracionDibujos'" v-show="false">
         Diseño Dibujos
       </button>
     </div>
@@ -13,7 +14,10 @@
       <ABCComponent v-if="currentView === 'abc'" />
       <MentorComponent v-else-if="currentView === 'mentor'" />
       <EliteComponent v-else-if="currentView === 'elite'" />
-      <Configuracion v-else-if="currentView === 'ConfiguracionDibujos'" />
+      <Configuracion
+        v-else-if="currentView === 'ConfiguracionDibujos'"
+        v-show="false"
+      />
       <p v-else>Selecciona una opción</p>
     </div>
   </div>
