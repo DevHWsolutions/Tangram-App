@@ -1,5 +1,7 @@
 <template>
   <div class="contenedor-principal">
+    <!-- Puedes colocarlos donde quieras en tu interfaz -->
+
     <!-- Canvas a la izquierda -->
     <v-stage
       ref="stage"
@@ -24,23 +26,37 @@
           :config="getUserShapeConfig(piece)"
           @dragend="handleDragEnd"
         />
-
-        <v-transformer ref="transformer" :resizeEnabled="false" />
       </v-layer>
     </v-stage>
+
+    <!-- <RotadorModal
+      :visible="mostrarModalRotar"
+      :selectedId="selectedShapeId"
+      @close="mostrarModalRotar = false"
+      @rotate="rotarFigura"
+    /> -->
 
     <!-- Info a la derecha -->
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
       <OrdenPiezas :piezas="userPieces" />
-      <EstadoJuego
+      <!-- Componente para el estatus del Juego  -->
+
+      <!-- <EstadoJuego
         ref="estadoJuego"
         :totalPiezas="triangulo.length"
         :piezasCorrectas="correctPiecesCount"
         :intentosIniciales="6"
         :duracion="60"
         @finalizado="manejarFinJuego"
-      />
+      /> -->
+    </div>
+    <div v-if="selectedShapeId" class="acciones-rotacion">
+      <span class="titulo-acciones-rotacion">Acciones:</span>
+      <span>Pieza:</span>
+      <span>{{ selectedShapeId }}</span>
+      <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
+      <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
     </div>
   </div>
 </template>
@@ -64,9 +80,10 @@ import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "../../../trianguloABC.js"; // Asegúrate de que la ruta sea correcta
 import OrdenPiezas from "../../common/OrdenPiezas.vue";
 import EstadoJuego from "../../common/EstadoJuego.vue";
-
+import RotalModal from "../../common/RotarModal.vue";
 const estadoJuego = ref(null);
 
+const mostrarModalRotar = ref(false);
 function manejarFinJuego(resultado) {
   if (resultado.gano) {
     alert("¡Felicidades, ganaste!");
@@ -76,7 +93,7 @@ function manejarFinJuego(resultado) {
 }
 const stageSize = ref({
   width: 900,
-  height: 700,
+  height: 650,
 });
 const triangulo = ref(trianguloData);
 const userPieces = ref([
@@ -86,7 +103,7 @@ const userPieces = ref([
     nombre: "Triángulo Grande 1",
     points: [...trianguloData.find((p) => p.id === "p1").points],
     x: 750,
-    y: 220,
+    y: 0,
     fill: "skyblue",
     rotation: 45,
     draggable: true,
@@ -97,7 +114,7 @@ const userPieces = ref([
     nombre: "Triángulo Grande 2",
     points: [...trianguloData.find((p) => p.id === "p2").points],
     x: 750,
-    y: 90,
+    y: 150,
     fill: "orange",
     rotation: 45,
     draggable: true,
@@ -107,8 +124,8 @@ const userPieces = ref([
     templateId: "p3",
     nombre: "Triángulo Mediano",
     points: [...trianguloData.find((p) => p.id === "p3").points],
-    x: 700,
-    y: 340,
+    x: 685,
+    y: 310,
     fill: "magenta",
     rotation: 0,
     draggable: true,
@@ -118,8 +135,8 @@ const userPieces = ref([
     templateId: "p4",
     nombre: "Triángulo Pequeño 1",
     points: [...trianguloData.find((p) => p.id === "p4").points],
-    x: 700,
-    y: 440,
+    x: 800,
+    y: 370,
     fill: "lime",
     rotation: 315,
     draggable: true,
@@ -129,8 +146,8 @@ const userPieces = ref([
     templateId: "p5",
     nombre: "Triángulo Pequeño 2",
     points: [...trianguloData.find((p) => p.id === "p5").points],
-    x: 700,
-    y: 440,
+    x: 785,
+    y: 375,
     fill: "yellow",
     rotation: 45,
     draggable: true,
@@ -141,7 +158,7 @@ const userPieces = ref([
     nombre: "Cuadrado",
     points: [...trianguloData.find((p) => p.id === "p6").points],
     x: 700,
-    y: 520,
+    y: 500,
     fill: "blue",
     rotation: 45,
     draggable: true,
@@ -151,7 +168,7 @@ const userPieces = ref([
     templateId: "p7",
     nombre: "Paralelogramo",
     points: [...trianguloData.find((p) => p.id === "p7").points],
-    x: 700,
+    x: 800,
     y: 520,
     fill: "teal",
     rotation: 180,
@@ -269,36 +286,11 @@ const getUserShapeConfig = (piece) => ({
 });
 
 const selectedShapeId = ref("");
-const transformer = ref(null);
-
-const updateTransformer = () => {
-  const transformerNode = transformer.value.getNode();
-  const stage = transformerNode.getStage();
-
-  const selectedNode = stage.findOne("#" + selectedShapeId.value);
-
-  // Verifica si la pieza seleccionada realmente está en userPieces
-  const isUserPiece = userPieces.value.some(
-    (p) => p.id === selectedShapeId.value
-  );
-
-  if (selectedNode && isUserPiece) {
-    transformerNode.nodes([selectedNode]);
-  } else {
-    transformerNode.nodes([]);
-  }
-};
 
 const handleStageMouseDown = (e) => {
   if (e.target === e.target.getStage()) {
     selectedShapeId.value = "";
     updateTransformer();
-    return;
-  }
-
-  const clickedOnTransformer =
-    e.target.getParent()?.className === "Transformer";
-  if (clickedOnTransformer) {
     return;
   }
 
@@ -310,8 +302,17 @@ const handleStageMouseDown = (e) => {
   } else {
     selectedShapeId.value = "";
   }
-  updateTransformer();
 };
+
+//Función de la rotación
+function rotarSeleccion(grados) {
+  const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+  if (pieza && pieza.draggable) {
+    pieza.rotation = (pieza.rotation + grados) % 360;
+  }
+}
+
+//Funcion para limitar que se salga de la pantalla
 </script>
 
 <style scoped>
@@ -320,6 +321,27 @@ const handleStageMouseDown = (e) => {
   border: 1px solid #ccc;
 }
 p {
-  padding-top: 5px;
+  padding-top: 10px;
+}
+.acciones-rotacion {
+  outline: 2px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 5px;
+}
+.acciones-rotacion button {
+  margin: 5px;
+}
+.titulo-acciones-rotacion {
+  color: var(--black-36-a-7680, #6a7680);
+  text-align: center;
+
+  /* Button - Consola DEV */
+  font-family: Montserrat;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 </style>
