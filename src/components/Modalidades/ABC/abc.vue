@@ -80,12 +80,34 @@ import RotalModal from "../../common/RotarModal.vue";
 const estadoJuego = ref(null);
 
 function manejarFinJuego(resultado) {
+  juegoBloqueado.value = true;
+
   if (resultado.gano) {
     alert("¡Felicidades, ganaste!");
   } else {
     alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
+    location.reload(); // 👈 Esto recarga toda la página
   }
 }
+
+function reiniciarJuego() {
+  console.log("reiniciamos");
+  // Restaurar piezas
+  userPieces.value.forEach((pieza) => {
+    pieza.x = pieza.originalX;
+    pieza.y = pieza.originalY;
+    pieza.rotation = pieza.originalRotation;
+    pieza.draggable = true;
+  });
+
+  // Limpiar estado
+  correctPieces.value = {};
+  correctPiecesCount.value = 0;
+  juegoBloqueado.value = false;
+}
+
+const juegoBloqueado = ref(false);
+
 const stageSize = ref({
   width: 900,
   height: 650,
@@ -353,6 +375,7 @@ const getTemplateTextConfig = (piece, index) => ({
 // });
 
 const handleDragEnd = (e) => {
+  if (juegoBloqueado.value) return;
   //   ✅ Ahora cubre:
   // ✔️ Coloca pieza correctamente → se queda y suma punto.
 

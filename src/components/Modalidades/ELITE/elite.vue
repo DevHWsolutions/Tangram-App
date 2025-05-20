@@ -73,11 +73,15 @@ import OrdenPiezas from "../../common/OrdenPiezas.vue";
 import EstadoJuego from "../../common/EstadoJuego.vue";
 
 const estadoJuego = ref(null);
+const juegoBloqueado = ref(false);
 function manejarFinJuego(resultado) {
+  juegoBloqueado.value = true;
+
   if (resultado.gano) {
     alert("¡Felicidades, ganaste!");
   } else {
     alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
+    location.reload(); // 👈 Esto recarga toda la página
   }
 }
 const stageSize = ref({
