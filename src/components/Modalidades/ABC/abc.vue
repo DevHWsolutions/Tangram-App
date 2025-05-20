@@ -42,34 +42,37 @@
       <OrdenPiezas :piezas="userPieces" />
       <!-- Componente para el estatus del Juego  -->
 
-      <!-- <EstadoJuego
+      <EstadoJuego
         ref="estadoJuego"
         :totalPiezas="triangulo.length"
         :piezasCorrectas="correctPiecesCount"
         :intentosIniciales="6"
         :duracion="60"
         @finalizado="manejarFinJuego"
-      /> -->
-    </div>
-    <div v-if="selectedShapeId" class="acciones-rotacion">
-      <span class="titulo-acciones-rotacion">Acciones:</span>
-      <span>Pieza:</span>
-      <span>{{ selectedShapeId }}</span>
-      <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
-      <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
+      />
+
+      <div v-if="selectedShapeId" class="acciones-rotacion">
+        <span class="titulo-acciones-rotacion">Acciones:</span>
+        <span>Pieza:</span>
+        <span>{{ selectedShapeId }}</span>
+        <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
+        <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .contenedor-principal {
+  border-radius: 32px;
+  background: #eff3fb;
   display: flex;
   align-items: flex-start;
-  gap: 20px;
+  margin: 5px;
 }
 
 .panel-lateral {
-  width: 250px;
+  width: 150x;
   padding: 10px;
   border-left: 2px solid #ccc;
 }
@@ -175,12 +178,19 @@ const userPieces = ref([
     draggable: true,
   },
 ]);
+// ✅ Aquí guardamos posición y rotación original
+userPieces.value = userPieces.value.map((p) => ({
+  ...p,
+  originalX: p.x,
+  originalY: p.y,
+  originalRotation: p.rotation,
+}));
 const correctPieces = ref({});
 const correctPiecesCount = ref(0);
 
 const templateColor = "gray";
 const templateOpacity = 0.5;
-const positionTolerance = 2;
+const positionTolerance = 20;
 const rotationTolerance = 5;
 
 const getTemplateShapeConfig = (piece) => ({
@@ -212,53 +222,274 @@ const getTemplateTextConfig = (piece, index) => ({
   opacity: 0.8,
 });
 
-const handleDragEnd = (e) => {
-  console.log("Drag end triggered");
+// const handleDragEnd = (e) => {
+//   console.log("Drag end triggered");
 
+//   const id = e.target.id();
+//   const draggedPiece = userPieces.value.find((p) => p.id === id);
+//   if (!draggedPiece) {
+//     console.log("No piece found for id:", id);
+//     return;
+//   }
+
+//   // ✅ ACTUALIZAR posición y rotación
+//   draggedPiece.x = e.target.x();
+//   draggedPiece.y = e.target.y();
+//   draggedPiece.rotation = e.target.rotation();
+
+//   console.log("Dragged piece (updated):", draggedPiece);
+
+//   const guidePiece = triangulo.value.find(
+//     (p) => p.id === draggedPiece.templateId
+//   );
+//   // Lo guiamos como iman para que se coloque normal la pieza
+//   if (guidePiece) {
+//     const isCorrectPosition =
+//       Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
+//       Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
+//     const isCorrectRotation =
+//       Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
+//       rotationTolerance;
+
+//     console.log("Position check:", isCorrectPosition);
+//     console.log("Rotation check:", isCorrectRotation);
+
+//     if (
+//       isCorrectPosition &&
+//       isCorrectRotation &&
+//       !correctPieces.value[draggedPiece.id]
+//     ) {
+//       correctPieces.value[draggedPiece.id] = true;
+//       correctPiecesCount.value++;
+
+//       // 🔁 Forzar que se pegue EXACTAMENTE al contorno
+//       draggedPiece.x = guidePiece.x;
+//       draggedPiece.y = guidePiece.y;
+//       draggedPiece.rotation = guidePiece.rotation;
+
+//       draggedPiece.draggable = false;
+
+//       console.log(`${draggedPiece.nombre} colocada correctamente.`);
+//     } else {
+//       console.log(`${draggedPiece.nombre} colocada incorrectamente.`);
+//       // 👇 Aquí restamos un intento si fue incorrecta
+//       estadoJuego.value?.perderIntento();
+//     }
+//   }
+
+//   // 🧪 ¿Qué hace este código?
+//   // 🔁 Recorre cada punto de tu figura.
+
+//   // 🌀 Aplica la rotación y la posición actual.
+
+//   // 📏 Verifica si se sale del canvas.
+
+//   // 🎯 Ajusta x e y solo lo necesario para meter todos los puntos otra vez dentro.
+//   const stageWidth = stageSize.value.width;
+//   const stageHeight = stageSize.value.height;
+
+//   let seSale = false;
+
+//   for (let i = 0; i < draggedPiece.points.length; i += 2) {
+//     const px = draggedPiece.points[i];
+//     const py = draggedPiece.points[i + 1];
+
+//     // Aplica rotación
+//     const angle = draggedPiece.rotation * (Math.PI / 180);
+//     const cos = Math.cos(angle);
+//     const sin = Math.sin(angle);
+
+//     const rotatedX = px * cos - py * sin;
+//     const rotatedY = px * sin + py * cos;
+
+//     // Traslada al mundo (posición en el canvas)
+//     const worldX = rotatedX + draggedPiece.x;
+//     const worldY = rotatedY + draggedPiece.y;
+
+//     // Verifica si el punto está fuera del canvas
+//     if (
+//       worldX < 0 ||
+//       worldX > stageWidth ||
+//       worldY < 0 ||
+//       worldY > stageHeight
+//     ) {
+//       seSale = true;
+//       break;
+//     }
+//   }
+
+//   if (seSale) {
+//     console.log("Se salió del canvas. Regresando a su posición original.");
+
+//     // ✨ ANIMACIÓN: regresa suavemente a su posición original
+//     e.target.to({
+//       x: draggedPiece.originalX,
+//       y: draggedPiece.originalY,
+//       rotation: draggedPiece.originalRotation,
+//       duration: 0.5,
+//       easing: Konva.Easings.EaseInOut,
+//     });
+
+//     // 🔁 También actualizamos los datos internos
+//     draggedPiece.x = draggedPiece.originalX;
+//     draggedPiece.y = draggedPiece.originalY;
+//     draggedPiece.rotation = draggedPiece.originalRotation;
+//   }
+// };
+
+// const getUserShapeConfig = (piece) => ({
+//   x: piece.x,
+//   y: piece.y,
+//   fill: piece.fill,
+//   stroke: "black",
+//   strokeWidth: 2,
+//   draggable: piece.draggable,
+//   id: piece.id,
+//   rotation: piece.rotation,
+//   sceneFunc: (context, shape) => {
+//     context.beginPath();
+//     context.moveTo(piece.points[0], piece.points[1]);
+//     for (let i = 2; i < piece.points.length; i += 2) {
+//       context.lineTo(piece.points[i], piece.points[i + 1]);
+//     }
+//     context.closePath();
+//     context.fillStrokeShape(shape);
+//   },
+//   // on: {
+//   //   dragend: handleDragEnd,
+//   // },
+// });
+
+const handleDragEnd = (e) => {
+  //   ✅ Ahora cubre:
+  // ✔️ Coloca pieza correctamente → se queda y suma punto.
+
+  // ❌ Coloca en cualquier guía incorrecta → vuelve con animación + resta intento.
+
+  // ⚠️ Coloca fuera del canvas → vuelve con animación (sin penalización).
+
+  // 🕊️ Coloca lejos de cualquier guía → no pasa nada.
   const id = e.target.id();
   const draggedPiece = userPieces.value.find((p) => p.id === id);
-  if (!draggedPiece) {
-    console.log("No piece found for id:", id);
-    return;
-  }
+  if (!draggedPiece) return;
 
-  // ✅ ACTUALIZAR posición y rotación
+  // Actualizamos posición y rotación
   draggedPiece.x = e.target.x();
   draggedPiece.y = e.target.y();
   draggedPiece.rotation = e.target.rotation();
-
-  console.log("Dragged piece (updated):", draggedPiece);
 
   const guidePiece = triangulo.value.find(
     (p) => p.id === draggedPiece.templateId
   );
 
-  if (guidePiece) {
-    const isCorrectPosition =
-      Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
-      Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
-    const isCorrectRotation =
-      Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
+  // Verificamos colocación cerca de alguna guía
+  const anyGuide = triangulo.value.find((p) => {
+    const closeEnough =
+      Math.abs(draggedPiece.x - p.x) < positionTolerance &&
+      Math.abs(draggedPiece.y - p.y) < positionTolerance;
+    return closeEnough;
+  });
+
+  const isCorrectPosition =
+    guidePiece &&
+    Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
+    Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
+
+  const isCorrectRotation =
+    guidePiece &&
+    Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
       rotationTolerance;
 
-    console.log("Position check:", isCorrectPosition);
-    console.log("Rotation check:", isCorrectRotation);
+  const esCorrecta = isCorrectPosition && isCorrectRotation;
+
+  if (esCorrecta && !correctPieces.value[draggedPiece.id]) {
+    // ✅ Pieza colocada correctamente
+    correctPieces.value[draggedPiece.id] = true;
+    correctPiecesCount.value++;
+
+    draggedPiece.x = guidePiece.x;
+    draggedPiece.y = guidePiece.y;
+    draggedPiece.rotation = guidePiece.rotation;
+    draggedPiece.draggable = false;
+
+    e.target.to({
+      x: guidePiece.x,
+      y: guidePiece.y,
+      rotation: guidePiece.rotation,
+      duration: 0.4,
+      easing: Konva.Easings.EaseInOut,
+    });
+
+    return;
+  }
+
+  // ❌ Si se soltó sobre una guía (cualquiera) pero fue incorrecta
+  if (anyGuide && !esCorrecta) {
+    console.log(
+      `${draggedPiece.nombre} colocada incorrectamente sobre una guía.`
+    );
+    estadoJuego.value?.perderIntento(); // 🔻 Resta intento
+
+    e.target.to({
+      x: draggedPiece.originalX,
+      y: draggedPiece.originalY,
+      rotation: draggedPiece.originalRotation,
+      duration: 0.4,
+      easing: Konva.Easings.EaseInOut,
+    });
+
+    draggedPiece.x = draggedPiece.originalX;
+    draggedPiece.y = draggedPiece.originalY;
+    draggedPiece.rotation = draggedPiece.originalRotation;
+
+    return;
+  }
+
+  // 🔁 Validar si se salió del canvas
+  const stageWidth = stageSize.value.width;
+  const stageHeight = stageSize.value.height;
+
+  let seSale = false;
+
+  for (let i = 0; i < draggedPiece.points.length; i += 2) {
+    const px = draggedPiece.points[i];
+    const py = draggedPiece.points[i + 1];
+
+    const angle = draggedPiece.rotation * (Math.PI / 180);
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    const rotatedX = px * cos - py * sin;
+    const rotatedY = px * sin + py * cos;
+
+    const worldX = rotatedX + draggedPiece.x;
+    const worldY = rotatedY + draggedPiece.y;
 
     if (
-      isCorrectPosition &&
-      isCorrectRotation &&
-      !correctPieces.value[draggedPiece.id]
+      worldX < 0 ||
+      worldX > stageWidth ||
+      worldY < 0 ||
+      worldY > stageHeight
     ) {
-      correctPieces.value[draggedPiece.id] = true;
-      correctPiecesCount.value++;
-      draggedPiece.draggable = false;
-
-      console.log(`${draggedPiece.nombre} colocada correctamente.`);
-    } else {
-      console.log(`${draggedPiece.nombre} colocada incorrectamente.`);
-      // 👇 Aquí restamos un intento si fue incorrecta
-      estadoJuego.value?.perderIntento();
+      seSale = true;
+      break;
     }
+  }
+
+  if (seSale) {
+    console.log("Se salió del canvas. Regresando a su posición original.");
+
+    e.target.to({
+      x: draggedPiece.originalX,
+      y: draggedPiece.originalY,
+      rotation: draggedPiece.originalRotation,
+      duration: 0.4,
+      easing: Konva.Easings.EaseInOut,
+    });
+
+    draggedPiece.x = draggedPiece.originalX;
+    draggedPiece.y = draggedPiece.originalY;
+    draggedPiece.rotation = draggedPiece.originalRotation;
   }
 };
 
@@ -271,6 +502,7 @@ const getUserShapeConfig = (piece) => ({
   draggable: piece.draggable,
   id: piece.id,
   rotation: piece.rotation,
+  // dragBoundFunc: (pos) => { ... } <-- esto ya no va
   sceneFunc: (context, shape) => {
     context.beginPath();
     context.moveTo(piece.points[0], piece.points[1]);
@@ -280,10 +512,36 @@ const getUserShapeConfig = (piece) => ({
     context.closePath();
     context.fillStrokeShape(shape);
   },
-  // on: {
-  //   dragend: handleDragEnd,
-  // },
 });
+const limitDragWithinBounds = (e) => {
+  const shape = e.target;
+  const stage = shape.getStage();
+  const stageWidth = stage.width();
+  const stageHeight = stage.height();
+
+  const box = shape.getClientRect();
+
+  let newX = shape.x();
+  let newY = shape.y();
+
+  if (box.x < 0) {
+    newX -= box.x;
+  }
+
+  if (box.y < 0) {
+    newY -= box.y;
+  }
+
+  if (box.x + box.width > stageWidth) {
+    newX -= box.x + box.width - stageWidth;
+  }
+
+  if (box.y + box.height > stageHeight) {
+    newY -= box.y + box.height - stageHeight;
+  }
+
+  shape.position({ x: newX, y: newY });
+};
 
 const selectedShapeId = ref("");
 
@@ -317,18 +575,17 @@ function rotarSeleccion(grados) {
 
 <style scoped>
 .v-stage {
-  outline: 2px solid black;
   border: 1px solid #ccc;
 }
 p {
   padding-top: 10px;
 }
 .acciones-rotacion {
-  outline: 2px solid black;
+  /* outline: 2px solid black; */
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 5px;
+  margin: 2rem;
 }
 .acciones-rotacion button {
   margin: 5px;
