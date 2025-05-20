@@ -29,13 +29,6 @@
       </v-layer>
     </v-stage>
 
-    <!-- <RotadorModal
-      :visible="mostrarModalRotar"
-      :selectedId="selectedShapeId"
-      @close="mostrarModalRotar = false"
-      @rotate="rotarFigura"
-    /> -->
-
     <!-- Info a la derecha -->
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
@@ -54,7 +47,7 @@
       <div v-if="selectedShapeId" class="acciones-rotacion">
         <span class="titulo-acciones-rotacion">Acciones:</span>
         <span>Pieza:</span>
-        <span>{{ selectedShapeId }}</span>
+        <span>{{ selectedPieceName }}</span>
         <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
         <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
       </div>
@@ -513,38 +506,13 @@ const getUserShapeConfig = (piece) => ({
     context.fillStrokeShape(shape);
   },
 });
-const limitDragWithinBounds = (e) => {
-  const shape = e.target;
-  const stage = shape.getStage();
-  const stageWidth = stage.width();
-  const stageHeight = stage.height();
-
-  const box = shape.getClientRect();
-
-  let newX = shape.x();
-  let newY = shape.y();
-
-  if (box.x < 0) {
-    newX -= box.x;
-  }
-
-  if (box.y < 0) {
-    newY -= box.y;
-  }
-
-  if (box.x + box.width > stageWidth) {
-    newX -= box.x + box.width - stageWidth;
-  }
-
-  if (box.y + box.height > stageHeight) {
-    newY -= box.y + box.height - stageHeight;
-  }
-
-  shape.position({ x: newX, y: newY });
-};
 
 const selectedShapeId = ref("");
 
+const selectedPieceName = computed(() => {
+  const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+  return pieza ? pieza.nombre : null;
+});
 const handleStageMouseDown = (e) => {
   if (e.target === e.target.getStage()) {
     selectedShapeId.value = "";
