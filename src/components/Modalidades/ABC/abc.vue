@@ -79,7 +79,6 @@ import EstadoJuego from "../../common/EstadoJuego.vue";
 import RotalModal from "../../common/RotarModal.vue";
 const estadoJuego = ref(null);
 
-const mostrarModalRotar = ref(false);
 function manejarFinJuego(resultado) {
   if (resultado.gano) {
     alert("¡Felicidades, ganaste!");
