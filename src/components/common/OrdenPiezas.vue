@@ -27,6 +27,16 @@ defineProps({
   max-width: 400px;
   font-family: sans-serif;
 }
+h3 {
+  color: var(--black-000000, #000);
+
+  /* Button - Consola DEV */
+  font-family: Montserrat;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
 ol {
   padding-left: 1.2em;
 }

@@ -1,5 +1,7 @@
 <template>
   <div class="contenedor-principal">
+    <!-- Puedes colocarlos donde quieras en tu interfaz -->
+
     <!-- Canvas a la izquierda -->
     <v-stage
       ref="stage"
@@ -27,40 +29,47 @@
       </v-layer>
     </v-stage>
 
+    <!-- <RotadorModal
+      :visible="mostrarModalRotar"
+      :selectedId="selectedShapeId"
+      @close="mostrarModalRotar = false"
+      @rotate="rotarFigura"
+    /> -->
+
     <!-- Info a la derecha -->
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
-      <!-- <OrdenPiezas :piezas="userPieces" /> -->
-      <EstadoJuego
+      <OrdenPiezas :piezas="userPieces" />
+      <!-- Componente para el estatus del Juego  -->
+
+      <!-- <EstadoJuego
         ref="estadoJuego"
         :totalPiezas="triangulo.length"
         :piezasCorrectas="correctPiecesCount"
         :intentosIniciales="6"
         :duracion="60"
         @finalizado="manejarFinJuego"
-      />
-      <div v-if="selectedShapeId" class="acciones-rotacion">
-        <span class="titulo-acciones-rotacion">Acciones:</span>
-        <span>Pieza:</span>
-        <span>{{ selectedPieceName }}</span>
-        <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
-        <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
-      </div>
+      /> -->
+    </div>
+    <div v-if="selectedShapeId" class="acciones-rotacion">
+      <span class="titulo-acciones-rotacion">Acciones:</span>
+      <span>Pieza:</span>
+      <span>{{ selectedShapeId }}</span>
+      <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
+      <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .contenedor-principal {
-  border-radius: 32px;
-  background: #eff3fb;
   display: flex;
   align-items: flex-start;
-  margin: 5px;
+  gap: 20px;
 }
 
 .panel-lateral {
-  width: 150x;
+  width: 250px;
   padding: 10px;
   border-left: 2px solid #ccc;
 }
@@ -68,20 +77,18 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { triangulo as trianguloData } from "../../../CamelloELITE.js"; // Asegúrate de que la ruta sea correcta
+import { triangulo as trianguloData } from "../../../trianguloABC.js"; // Asegúrate de que la ruta sea correcta
 import OrdenPiezas from "../../common/OrdenPiezas.vue";
 import EstadoJuego from "../../common/EstadoJuego.vue";
-
+import RotalModal from "../../common/RotarModal.vue";
 const estadoJuego = ref(null);
-const juegoBloqueado = ref(false);
-function manejarFinJuego(resultado) {
-  juegoBloqueado.value = true;
 
+const mostrarModalRotar = ref(false);
+function manejarFinJuego(resultado) {
   if (resultado.gano) {
     alert("¡Felicidades, ganaste!");
   } else {
     alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
-    location.reload(); // 👈 Esto recarga toda la página
   }
 }
 const stageSize = ref({
@@ -97,7 +104,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p1").points],
     x: 750,
     y: 0,
-    fill: "#F08784",
+    fill: "skyblue",
     rotation: 45,
     draggable: true,
   },
@@ -108,7 +115,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p2").points],
     x: 750,
     y: 150,
-    fill: "#F08784",
+    fill: "orange",
     rotation: 45,
     draggable: true,
   },
@@ -119,7 +126,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p3").points],
     x: 685,
     y: 310,
-    fill: "#F08784",
+    fill: "magenta",
     rotation: 0,
     draggable: true,
   },
@@ -130,7 +137,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p4").points],
     x: 800,
     y: 370,
-    fill: "#F08784",
+    fill: "lime",
     rotation: 315,
     draggable: true,
   },
@@ -141,7 +148,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p5").points],
     x: 785,
     y: 375,
-    fill: "#F08784",
+    fill: "yellow",
     rotation: 45,
     draggable: true,
   },
@@ -152,7 +159,7 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p6").points],
     x: 700,
     y: 500,
-    fill: "#F08784",
+    fill: "blue",
     rotation: 45,
     draggable: true,
   },
@@ -163,24 +170,17 @@ const userPieces = ref([
     points: [...trianguloData.find((p) => p.id === "p7").points],
     x: 800,
     y: 520,
-    fill: "#F08784",
+    fill: "teal",
     rotation: 180,
     draggable: true,
   },
 ]);
-// ✅ Aquí guardamos posición y rotación original
-userPieces.value = userPieces.value.map((p) => ({
-  ...p,
-  originalX: p.x,
-  originalY: p.y,
-  originalRotation: p.rotation,
-}));
 const correctPieces = ref({});
 const correctPiecesCount = ref(0);
 
-const templateColor = "#F08784";
+const templateColor = "gray";
 const templateOpacity = 0.5;
-const positionTolerance = 5;
+const positionTolerance = 20;
 const rotationTolerance = 5;
 
 const getTemplateShapeConfig = (piece) => ({
@@ -213,138 +213,83 @@ const getTemplateTextConfig = (piece, index) => ({
 });
 
 const handleDragEnd = (e) => {
-  //   ✅ Ahora cubre:
-  // ✔️ Coloca pieza correctamente → se queda y suma punto.
+  console.log("Drag end triggered");
 
-  // ❌ Coloca en cualquier guía incorrecta → vuelve con animación + resta intento.
-
-  // ⚠️ Coloca fuera del canvas → vuelve con animación (sin penalización).
-
-  // 🕊️ Coloca lejos de cualquier guía → no pasa nada.
   const id = e.target.id();
   const draggedPiece = userPieces.value.find((p) => p.id === id);
-  if (!draggedPiece) return;
+  if (!draggedPiece) {
+    console.log("No piece found for id:", id);
+    return;
+  }
 
-  // Actualizamos posición y rotación
+  // ✅ ACTUALIZAR posición y rotación
   draggedPiece.x = e.target.x();
   draggedPiece.y = e.target.y();
   draggedPiece.rotation = e.target.rotation();
+
+  console.log("Dragged piece (updated):", draggedPiece);
 
   const guidePiece = triangulo.value.find(
     (p) => p.id === draggedPiece.templateId
   );
 
-  // Verificamos colocación cerca de alguna guía
-  const anyGuide = triangulo.value.find((p) => {
-    const closeEnough =
-      Math.abs(draggedPiece.x - p.x) < positionTolerance &&
-      Math.abs(draggedPiece.y - p.y) < positionTolerance;
-    return closeEnough;
-  });
-
-  const isCorrectPosition =
-    guidePiece &&
-    Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
-    Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
-
-  const isCorrectRotation =
-    guidePiece &&
-    Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
+  if (guidePiece) {
+    const isCorrectPosition =
+      Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
+      Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
+    const isCorrectRotation =
+      Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
       rotationTolerance;
 
-  const esCorrecta = isCorrectPosition && isCorrectRotation;
-
-  if (esCorrecta && !correctPieces.value[draggedPiece.id]) {
-    // ✅ Pieza colocada correctamente
-    correctPieces.value[draggedPiece.id] = true;
-    correctPiecesCount.value++;
-
-    draggedPiece.x = guidePiece.x;
-    draggedPiece.y = guidePiece.y;
-    draggedPiece.rotation = guidePiece.rotation;
-    draggedPiece.draggable = false;
-
-    e.target.to({
-      x: guidePiece.x,
-      y: guidePiece.y,
-      rotation: guidePiece.rotation,
-      duration: 0.4,
-      easing: Konva.Easings.EaseInOut,
-    });
-
-    return;
-  }
-
-  // ❌ Si se soltó sobre una guía (cualquiera) pero fue incorrecta
-  if (anyGuide && !esCorrecta) {
-    console.log(
-      `${draggedPiece.nombre} colocada incorrectamente sobre una guía.`
-    );
-    estadoJuego.value?.perderIntento(); // 🔻 Resta intento
-
-    e.target.to({
-      x: draggedPiece.originalX,
-      y: draggedPiece.originalY,
-      rotation: draggedPiece.originalRotation,
-      duration: 0.4,
-      easing: Konva.Easings.EaseInOut,
-    });
-
-    draggedPiece.x = draggedPiece.originalX;
-    draggedPiece.y = draggedPiece.originalY;
-    draggedPiece.rotation = draggedPiece.originalRotation;
-
-    return;
-  }
-
-  // 🔁 Validar si se salió del canvas
-  const stageWidth = stageSize.value.width;
-  const stageHeight = stageSize.value.height;
-
-  let seSale = false;
-
-  for (let i = 0; i < draggedPiece.points.length; i += 2) {
-    const px = draggedPiece.points[i];
-    const py = draggedPiece.points[i + 1];
-
-    const angle = draggedPiece.rotation * (Math.PI / 180);
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-
-    const rotatedX = px * cos - py * sin;
-    const rotatedY = px * sin + py * cos;
-
-    const worldX = rotatedX + draggedPiece.x;
-    const worldY = rotatedY + draggedPiece.y;
+    console.log("Position check:", isCorrectPosition);
+    console.log("Rotation check:", isCorrectRotation);
 
     if (
-      worldX < 0 ||
-      worldX > stageWidth ||
-      worldY < 0 ||
-      worldY > stageHeight
+      isCorrectPosition &&
+      isCorrectRotation &&
+      !correctPieces.value[draggedPiece.id]
     ) {
-      seSale = true;
-      break;
+      correctPieces.value[draggedPiece.id] = true;
+      correctPiecesCount.value++;
+
+      // 🔁 Forzar que se pegue EXACTAMENTE al contorno
+      draggedPiece.x = guidePiece.x;
+      draggedPiece.y = guidePiece.y;
+      draggedPiece.rotation = guidePiece.rotation;
+
+      draggedPiece.draggable = false;
+
+      console.log(`${draggedPiece.nombre} colocada correctamente.`);
+    } else {
+      console.log(`${draggedPiece.nombre} colocada incorrectamente.`);
+      // 👇 Aquí restamos un intento si fue incorrecta
+      estadoJuego.value?.perderIntento();
     }
-  }
-
-  if (seSale) {
-    console.log("Se salió del canvas. Regresando a su posición original.");
-
-    e.target.to({
-      x: draggedPiece.originalX,
-      y: draggedPiece.originalY,
-      rotation: draggedPiece.originalRotation,
-      duration: 0.4,
-      easing: Konva.Easings.EaseInOut,
-    });
-
-    draggedPiece.x = draggedPiece.originalX;
-    draggedPiece.y = draggedPiece.originalY;
-    draggedPiece.rotation = draggedPiece.originalRotation;
   }
 };
 
+// const getUserShapeConfig = (piece) => ({
+//   x: piece.x,
+//   y: piece.y,
+//   fill: piece.fill,
+//   stroke: "black",
+//   strokeWidth: 2,
+//   draggable: piece.draggable,
+//   id: piece.id,
+//   rotation: piece.rotation,
+//   sceneFunc: (context, shape) => {
+//     context.beginPath();
+//     context.moveTo(piece.points[0], piece.points[1]);
+//     for (let i = 2; i < piece.points.length; i += 2) {
+//       context.lineTo(piece.points[i], piece.points[i + 1]);
+//     }
+//     context.closePath();
+//     context.fillStrokeShape(shape);
+//   },
+//   // on: {
+//   //   dragend: handleDragEnd,
+//   // },
+// });
 const getUserShapeConfig = (piece) => ({
   x: piece.x,
   y: piece.y,
@@ -354,6 +299,20 @@ const getUserShapeConfig = (piece) => ({
   draggable: piece.draggable,
   id: piece.id,
   rotation: piece.rotation,
+  dragBoundFunc: (pos) => {
+    // Dimensiones máximas del stage
+    const maxX = stageSize.value.width;
+    const maxY = stageSize.value.height;
+
+    // Tamaño estimado de la pieza (puedes ajustar este margen si es necesario)
+    const buffer = 50;
+
+    // Retornar posición limitada
+    return {
+      x: Math.min(Math.max(pos.x, 0), maxX - buffer),
+      y: Math.min(Math.max(pos.y, 0), maxY - buffer),
+    };
+  },
   sceneFunc: (context, shape) => {
     context.beginPath();
     context.moveTo(piece.points[0], piece.points[1]);
@@ -363,22 +322,14 @@ const getUserShapeConfig = (piece) => ({
     context.closePath();
     context.fillStrokeShape(shape);
   },
-  // on: {
-  //   dragend: handleDragEnd,
-  // },
 });
 
 const selectedShapeId = ref("");
 
-const selectedPieceName = computed(() => {
-  const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
-  return pieza ? pieza.nombre : null;
-});
-
 const handleStageMouseDown = (e) => {
   if (e.target === e.target.getStage()) {
     selectedShapeId.value = "";
-
+    updateTransformer();
     return;
   }
 
@@ -399,21 +350,24 @@ function rotarSeleccion(grados) {
     pieza.rotation = (pieza.rotation + grados) % 360;
   }
 }
+
+//Funcion para limitar que se salga de la pantalla
 </script>
 
 <style scoped>
 .v-stage {
+  outline: 2px solid black;
   border: 1px solid #ccc;
 }
 p {
   padding-top: 10px;
 }
 .acciones-rotacion {
-  /* outline: 2px solid black; */
+  outline: 2px solid black;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 2rem;
+  margin: 5px;
 }
 .acciones-rotacion button {
   margin: 5px;
