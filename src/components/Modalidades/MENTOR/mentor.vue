@@ -378,12 +378,6 @@ const selectedPieceName = computed(() => {
   return pieza ? pieza.nombre : null;
 });
 const handleStageMouseDown = (e) => {
-  if (e.target === e.target.getStage()) {
-    selectedShapeId.value = "";
-    updateTransformer();
-    return;
-  }
-
   const id = e.target.id();
   // Asegúrate de que solo los userPieces sean seleccionables
   const piece = userPieces.value.find((p) => p.id === id);
