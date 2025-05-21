@@ -35,7 +35,7 @@ const currentView = ref("");
 <style scoped>
 .menu {
   display: flex;
-  gap: 10px;
+  margin-right: 10px;
   margin-bottom: 20px;
 }
 .contenido {
