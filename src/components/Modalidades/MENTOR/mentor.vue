@@ -23,6 +23,7 @@
           :key="piece.id"
           :config="getUserShapeConfig(piece)"
           @dragend="handleDragEnd"
+          @dragmove="handleDragMove"
         />
       </v-layer>
     </v-stage>
@@ -74,12 +75,14 @@ import OrdenPiezas from "../../common/OrdenPiezas.vue";
 import EstadoJuego from "../../common/EstadoJuego.vue";
 
 const estadoJuego = ref(null);
+const bordeRojoCanvas = ref(false);
 const juegoBloqueado = ref(false);
 function manejarFinJuego(resultado) {
   juegoBloqueado.value = true;
 
   if (resultado.gano) {
-    alert("¡Felicidades, ganaste!");
+    alert("¡Felicidades has alcanzado el 60% requerido, ganaste!");
+    location.reload(); // 👈 Esto recarga toda la página
   } else {
     alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
     location.reload(); // 👈 Esto recarga toda la página
@@ -183,8 +186,8 @@ const correctPiecesCount = ref(0);
 const templateColor = "#DFB852";
 const dash = [10, 5];
 const templateOpacity = 0.5;
-const positionTolerance = 20;
-const rotationTolerance = 20;
+const positionTolerance = 75;
+const rotationTolerance = 75;
 
 const getTemplateShapeConfig = (piece) => ({
   x: piece.x,
@@ -239,20 +242,147 @@ const getUserShapeConfig = (piece) => ({
   // },
 });
 
+// const handleDragEnd = (e) => {
+//   //   ✅ Ahora cubre:
+//   // ✔️ Coloca pieza correctamente → se queda y suma punto.
+
+//   // ❌ Coloca en cualquier guía incorrecta → vuelve con animación + resta intento.
+
+//   // ⚠️ Coloca fuera del canvas → vuelve con animación (sin penalización).
+
+//   // 🕊️ Coloca lejos de cualquier guía → no pasa nada.
+//   const id = e.target.id();
+//   const draggedPiece = userPieces.value.find((p) => p.id === id);
+//   if (!draggedPiece) return;
+
+//   // Actualizamos posición y rotación
+//   draggedPiece.x = e.target.x();
+//   draggedPiece.y = e.target.y();
+//   draggedPiece.rotation = e.target.rotation();
+
+//   const guidePiece = triangulo.value.find(
+//     (p) => p.id === draggedPiece.templateId
+//   );
+
+//   // Verificamos colocación cerca de alguna guía
+//   const anyGuide = triangulo.value.find((p) => {
+//     const closeEnough =
+//       Math.abs(draggedPiece.x - p.x) < positionTolerance &&
+//       Math.abs(draggedPiece.y - p.y) < positionTolerance;
+//     return closeEnough;
+//   });
+
+//   const isCorrectPosition =
+//     guidePiece &&
+//     Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
+//     Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
+
+//   const isCorrectRotation =
+//     guidePiece &&
+//     Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
+//       rotationTolerance;
+
+//   // const esCorrecta = isCorrectPosition && isCorrectRotation;
+//   const esCorrecta = isCorrectPosition;
+
+//   if (esCorrecta && !correctPieces.value[draggedPiece.id]) {
+//     // ✅ Pieza colocada correctamente
+//     correctPieces.value[draggedPiece.id] = true;
+//     correctPiecesCount.value++;
+
+//     draggedPiece.x = guidePiece.x;
+//     draggedPiece.y = guidePiece.y;
+//     draggedPiece.rotation = guidePiece.rotation;
+//     draggedPiece.draggable = false;
+
+//     e.target.to({
+//       x: guidePiece.x,
+//       y: guidePiece.y,
+//       rotation: guidePiece.rotation,
+//       duration: 0.4,
+//       easing: Konva.Easings.EaseInOut,
+//     });
+
+//     return;
+//   }
+
+//   // ❌ Si se soltó sobre una guía (cualquiera) pero fue incorrecta
+//   if (anyGuide && !esCorrecta) {
+//     console.log(
+//       `${draggedPiece.nombre} colocada incorrectamente sobre una guía.`
+//     );
+//     estadoJuego.value?.perderIntento(); // 🔻 Resta intento
+
+//     e.target.to({
+//       x: draggedPiece.originalX,
+//       y: draggedPiece.originalY,
+//       rotation: draggedPiece.originalRotation,
+//       duration: 0.4,
+//       easing: Konva.Easings.EaseInOut,
+//     });
+
+//     draggedPiece.x = draggedPiece.originalX;
+//     draggedPiece.y = draggedPiece.originalY;
+//     draggedPiece.rotation = draggedPiece.originalRotation;
+
+//     return;
+//   }
+
+//   // 🔁 Validar si se salió del canvas
+//   const stageWidth = stageSize.value.width;
+//   const stageHeight = stageSize.value.height;
+
+//   let seSale = false;
+
+//   for (let i = 0; i < draggedPiece.points.length; i += 2) {
+//     const px = draggedPiece.points[i];
+//     const py = draggedPiece.points[i + 1];
+
+//     const angle = draggedPiece.rotation * (Math.PI / 180);
+//     const cos = Math.cos(angle);
+//     const sin = Math.sin(angle);
+
+//     const rotatedX = px * cos - py * sin;
+//     const rotatedY = px * sin + py * cos;
+
+//     const worldX = rotatedX + draggedPiece.x;
+//     const worldY = rotatedY + draggedPiece.y;
+
+//     if (
+//       worldX < 0 ||
+//       worldX > stageWidth ||
+//       worldY < 0 ||
+//       worldY > stageHeight
+//     ) {
+//       seSale = true;
+//       break;
+//     }
+//   }
+
+//   if (seSale) {
+//     console.log("Se salió del canvas. Regresando a su posición original.");
+
+//     e.target.to({
+//       x: draggedPiece.originalX,
+//       y: draggedPiece.originalY,
+//       rotation: draggedPiece.originalRotation,
+//       duration: 0.4,
+//       easing: Konva.Easings.EaseInOut,
+//     });
+
+//     draggedPiece.x = draggedPiece.originalX;
+//     draggedPiece.y = draggedPiece.originalY;
+//     draggedPiece.rotation = draggedPiece.originalRotation;
+//   }
+// };
 const handleDragEnd = (e) => {
-  //   ✅ Ahora cubre:
-  // ✔️ Coloca pieza correctamente → se queda y suma punto.
+  if (juegoBloqueado.value) return;
 
-  // ❌ Coloca en cualquier guía incorrecta → vuelve con animación + resta intento.
-
-  // ⚠️ Coloca fuera del canvas → vuelve con animación (sin penalización).
-
-  // 🕊️ Coloca lejos de cualquier guía → no pasa nada.
   const id = e.target.id();
   const draggedPiece = userPieces.value.find((p) => p.id === id);
   if (!draggedPiece) return;
 
-  // Actualizamos posición y rotación
+  // Actualiza posición y rotación
   draggedPiece.x = e.target.x();
   draggedPiece.y = e.target.y();
   draggedPiece.rotation = e.target.rotation();
@@ -261,7 +391,6 @@ const handleDragEnd = (e) => {
     (p) => p.id === draggedPiece.templateId
   );
 
-  // Verificamos colocación cerca de alguna guía
   const anyGuide = triangulo.value.find((p) => {
     const closeEnough =
       Math.abs(draggedPiece.x - p.x) < positionTolerance &&
@@ -269,20 +398,40 @@ const handleDragEnd = (e) => {
     return closeEnough;
   });
 
-  const isCorrectPosition =
-    guidePiece &&
-    Math.abs(draggedPiece.x - guidePiece.x) < positionTolerance &&
-    Math.abs(draggedPiece.y - guidePiece.y) < positionTolerance;
+  // Validación: puntos geométricos
+  const puntosCoinciden = (pieza, guia, tolerancia = 25) => {
+    if (!pieza || !guia || pieza.points.length !== guia.points.length)
+      return false;
 
-  const isCorrectRotation =
-    guidePiece &&
-    Math.abs(draggedPiece.rotation - guidePiece.rotation) % 360 <
-      rotationTolerance;
+    for (let i = 0; i < pieza.points.length; i += 2) {
+      const [px, py] = [pieza.points[i], pieza.points[i + 1]];
+      const anglePieza = pieza.rotation * (Math.PI / 180);
+      const rotadoXP = px * Math.cos(anglePieza) - py * Math.sin(anglePieza);
+      const rotadoYP = px * Math.sin(anglePieza) + py * Math.cos(anglePieza);
+      const worldXP = rotadoXP + pieza.x;
+      const worldYP = rotadoYP + pieza.y;
 
-  const esCorrecta = isCorrectPosition && isCorrectRotation;
+      const [gx, gy] = [guia.points[i], guia.points[i + 1]];
+      const angleGuia = guia.rotation * (Math.PI / 180);
+      const rotadoXG = gx * Math.cos(angleGuia) - gy * Math.sin(angleGuia);
+      const rotadoYG = gx * Math.sin(angleGuia) + gy * Math.cos(angleGuia);
+      const worldXG = rotadoXG + guia.x;
+      const worldYG = rotadoYG + guia.y;
 
+      const dx = worldXP - worldXG;
+      const dy = worldYP - worldYG;
+      const distancia = Math.sqrt(dx * dx + dy * dy);
+
+      if (distancia > tolerancia) return false;
+    }
+
+    return true;
+  };
+
+  const esCorrecta = puntosCoinciden(draggedPiece, guidePiece);
+
+  // ✅ Pieza colocada correctamente
   if (esCorrecta && !correctPieces.value[draggedPiece.id]) {
-    // ✅ Pieza colocada correctamente
     correctPieces.value[draggedPiece.id] = true;
     correctPiecesCount.value++;
 
@@ -302,32 +451,40 @@ const handleDragEnd = (e) => {
     return;
   }
 
-  // ❌ Si se soltó sobre una guía (cualquiera) pero fue incorrecta
+  // ❌ Está sobre la guía pero mal colocada → Mostrar rojo y contar intento fallido
   if (anyGuide && !esCorrecta) {
     console.log(
-      `${draggedPiece.nombre} colocada incorrectamente sobre una guía.`
+      `${draggedPiece.nombre} colocada incorrectamente. Mostrando en rojo.`
     );
-    estadoJuego.value?.perderIntento(); // 🔻 Resta intento
+    estadoJuego.value?.perderIntento();
 
-    e.target.to({
-      x: draggedPiece.originalX,
-      y: draggedPiece.originalY,
-      rotation: draggedPiece.originalRotation,
-      duration: 0.4,
-      easing: Konva.Easings.EaseInOut,
-    });
+    // Color rojo temporal
+    const originalFill = e.target.fill();
+    e.target.fill("red");
+    e.target.getLayer().batchDraw();
 
-    draggedPiece.x = draggedPiece.originalX;
-    draggedPiece.y = draggedPiece.originalY;
-    draggedPiece.rotation = draggedPiece.originalRotation;
+    setTimeout(() => {
+      e.target.fill(originalFill);
+
+      e.target.to({
+        x: draggedPiece.originalX,
+        y: draggedPiece.originalY,
+        rotation: draggedPiece.originalRotation,
+        duration: 0.4,
+        easing: Konva.Easings.EaseInOut,
+      });
+
+      draggedPiece.x = draggedPiece.originalX;
+      draggedPiece.y = draggedPiece.originalY;
+      draggedPiece.rotation = draggedPiece.originalRotation;
+    }, 300); // rojo visible 300ms
 
     return;
   }
 
-  // 🔁 Validar si se salió del canvas
+  // 🔁 Validación de si se salió del canvas
   const stageWidth = stageSize.value.width;
   const stageHeight = stageSize.value.height;
-
   let seSale = false;
 
   for (let i = 0; i < draggedPiece.points.length; i += 2) {
@@ -335,12 +492,8 @@ const handleDragEnd = (e) => {
     const py = draggedPiece.points[i + 1];
 
     const angle = draggedPiece.rotation * (Math.PI / 180);
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-
-    const rotatedX = px * cos - py * sin;
-    const rotatedY = px * sin + py * cos;
-
+    const rotatedX = px * Math.cos(angle) - py * Math.sin(angle);
+    const rotatedY = px * Math.sin(angle) + py * Math.cos(angle);
     const worldX = rotatedX + draggedPiece.x;
     const worldY = rotatedY + draggedPiece.y;
 
@@ -356,7 +509,7 @@ const handleDragEnd = (e) => {
   }
 
   if (seSale) {
-    console.log("Se salió del canvas. Regresando a su posición original.");
+    console.log("Se salió del canvas. Regresando a posición original.");
 
     e.target.to({
       x: draggedPiece.originalX,
@@ -372,6 +525,56 @@ const handleDragEnd = (e) => {
   }
 };
 
+//ESta funcion bloquea la sliada de la pieza del canvas
+const handleDragMove = (e) => {
+  const shape = e.target;
+  const id = shape.id();
+  const draggedPiece = userPieces.value.find((p) => p.id === id);
+  if (!draggedPiece) return;
+
+  const stageWidth = stageSize.value.width;
+  const stageHeight = stageSize.value.height;
+
+  let fuera = false;
+
+  for (let i = 0; i < draggedPiece.points.length; i += 2) {
+    const px = draggedPiece.points[i];
+    const py = draggedPiece.points[i + 1];
+
+    const angle = draggedPiece.rotation * (Math.PI / 180);
+    const rotatedX = px * Math.cos(angle) - py * Math.sin(angle);
+    const rotatedY = px * Math.sin(angle) + py * Math.cos(angle);
+    const worldX = rotatedX + shape.x();
+    const worldY = rotatedY + shape.y();
+
+    if (
+      worldX < 0 ||
+      worldX > stageWidth ||
+      worldY < 0 ||
+      worldY > stageHeight
+    ) {
+      fuera = true;
+      break;
+    }
+  }
+
+  if (fuera) {
+    // 🔴 Mostrar borde rojo o feedback visual
+    bordeRojoCanvas.value = true;
+
+    // Cancelamos el movimiento
+    shape.setX(draggedPiece.x); // Regresa a última posición válida
+    shape.setY(draggedPiece.y);
+  } else {
+    bordeRojoCanvas.value = false;
+
+    // Guardamos la posición válida
+    draggedPiece.x = shape.x();
+    draggedPiece.y = shape.y();
+  }
+
+  shape.getLayer().batchDraw();
+};
 const selectedShapeId = ref("");
 const selectedPieceName = computed(() => {
   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
@@ -389,10 +592,51 @@ const handleStageMouseDown = (e) => {
 };
 
 //Función de la rotación
+// function rotarSeleccion(grados) {
+//   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+//   if (pieza && pieza.draggable) {
+//     pieza.rotation = (pieza.rotation + grados) % 360;
+//   }
+// }
 function rotarSeleccion(grados) {
   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
-  if (pieza && pieza.draggable) {
-    pieza.rotation = (pieza.rotation + grados) % 360;
+  if (!pieza || !pieza.draggable) return;
+
+  const nuevaRotacion = (pieza.rotation + grados) % 360;
+  const angleRad = nuevaRotacion * (Math.PI / 180);
+
+  const stageWidth = stageSize.value.width;
+  const stageHeight = stageSize.value.height;
+
+  let seSale = false;
+
+  for (let i = 0; i < pieza.points.length; i += 2) {
+    const px = pieza.points[i];
+    const py = pieza.points[i + 1];
+
+    // aplicar rotación a cada punto
+    const rotatedX = px * Math.cos(angleRad) - py * Math.sin(angleRad);
+    const rotatedY = px * Math.sin(angleRad) + py * Math.cos(angleRad);
+
+    // trasladar al mundo real (posición actual de la pieza)
+    const worldX = rotatedX + pieza.x;
+    const worldY = rotatedY + pieza.y;
+
+    if (
+      worldX < 0 ||
+      worldX > stageWidth ||
+      worldY < 0 ||
+      worldY > stageHeight
+    ) {
+      seSale = true;
+      break;
+    }
+  }
+
+  if (!seSale) {
+    pieza.rotation = nuevaRotacion;
+  } else {
+    console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
   }
 }
 </script>
