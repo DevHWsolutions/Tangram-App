@@ -669,7 +669,7 @@ const handleDragEnd = (e) => {
 
   // En cualquier otro caso: mantener en donde se soltó (fuera de guía pero dentro del canvas)
 };
-//ESta funcion bloquea la sliada de la pieza del canvas 
+//ESta funcion bloquea la sliada de la pieza del canvas
 const handleDragMove = (e) => {
   const shape = e.target;
   const id = shape.id();
@@ -808,7 +808,10 @@ function rotarSeleccion(grados) {
   if (!seSale) {
     pieza.rotation = nuevaRotacion;
   } else {
-    console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+    // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+    alert(
+      "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del triangujo con #2 puedes apoyarte en girar tu pieza ✅"
+    );
   }
 }
 

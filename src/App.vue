@@ -35,8 +35,13 @@ const currentView = ref("");
 <style scoped>
 .menu {
   display: flex;
-  gap: 10px;
+  /* margin-right: 15px;s */
   margin-bottom: 20px;
+  padding: 10px;
+  /* margin-right: 20px; */
+}
+button {
+  margin-right: 10px;
 }
 .contenido {
   border-top: 1px solid #ccc;
