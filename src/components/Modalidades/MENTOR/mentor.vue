@@ -636,7 +636,10 @@ function rotarSeleccion(grados) {
   if (!seSale) {
     pieza.rotation = nuevaRotacion;
   } else {
-    console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+    // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+    alert(
+      "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
+    );
   }
 }
 </script>
