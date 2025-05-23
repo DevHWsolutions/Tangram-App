@@ -669,7 +669,7 @@ const handleDragEnd = (e) => {
 
   // En cualquier otro caso: mantener en donde se soltó (fuera de guía pero dentro del canvas)
 };
-//ESta funcion bloquea la sliada de la pieza del canvas 
+//ESta funcion bloquea la sliada de la pieza del canvas
 const handleDragMove = (e) => {
   const shape = e.target;
   const id = shape.id();
