@@ -31,6 +31,13 @@
         </li>
       </ul>
     </div>
+    <div v-if="selectedShapeId" class="acciones-rotacion">
+      <span class="titulo-acciones-rotacion">Acciones:</span>
+      <span>Pieza:</span>
+      <span>{{ selectedPieceName }}</span>
+      <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
+      <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
+    </div>
     <div>
       <input
         v-model="nombreArchivo"
@@ -44,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "../trianguloABC.js";
 
 const stageSize = ref({ width: 900, height: 700 });
@@ -128,7 +135,7 @@ const userPieces = ref([
     draggable: true,
   },
 ]);
-
+// const selectedShapeId = ref("");
 const getUserShapeConfig = (piece) => ({
   x: piece.x,
   y: piece.y,
@@ -252,6 +259,54 @@ function guardarJSON() {
 
   URL.revokeObjectURL(url);
 }
+const selectedPieceName = computed(() => {
+  const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+  return pieza ? pieza.nombre : null;
+});
+function rotarSeleccion(grados) {
+  const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+  if (!pieza || !pieza.draggable) return;
+
+  const nuevaRotacion = (pieza.rotation + grados) % 360;
+  const angleRad = nuevaRotacion * (Math.PI / 180);
+
+  const stageWidth = stageSize.value.width;
+  const stageHeight = stageSize.value.height;
+
+  let seSale = false;
+
+  for (let i = 0; i < pieza.points.length; i += 2) {
+    const px = pieza.points[i];
+    const py = pieza.points[i + 1];
+
+    // aplicar rotación a cada punto
+    const rotatedX = px * Math.cos(angleRad) - py * Math.sin(angleRad);
+    const rotatedY = px * Math.sin(angleRad) + py * Math.cos(angleRad);
+
+    // trasladar al mundo real (posición actual de la pieza)
+    const worldX = rotatedX + pieza.x;
+    const worldY = rotatedY + pieza.y;
+
+    if (
+      worldX < 0 ||
+      worldX > stageWidth ||
+      worldY < 0 ||
+      worldY > stageHeight
+    ) {
+      seSale = true;
+      break;
+    }
+  }
+
+  if (!seSale) {
+    pieza.rotation = nuevaRotacion;
+  } else {
+    // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+    alert(
+      "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., 👽Pista: Puedes apoyarte en el centro entre las figuras 6 y 3 ✅"
+    );
+  }
+}
 </script>
 
 <style scoped>
@@ -289,5 +344,55 @@ p {
 }
 .btn:hover {
   background-color: #1a242f;
+}
+
+.acciones-rotacion {
+  /* outline: 2px solid black; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem;
+}
+.acciones-rotacion button {
+  margin: 5px;
+}
+button {
+  padding: 10px 16px;
+  margin: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff; /* Azul fuerte para contraste */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Asegura legibilidad del texto */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+.titulo-acciones-rotacion {
+  color: var(--black-36-a-7680, #6a7680);
+  text-align: center;
+
+  font-size: 18px;
+  font-weight: bold;
+  color: #343a40;
+  margin-right: 10px;
+  padding: 4px 8px;
+}
+
+.titulo-acciones-rotacion,
+.titulo-acciones-rotacion + span,
+.titulo-acciones-rotacion + span + span {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  vertical-align: middle;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.titulo-acciones-rotacion + span,
+.titulo-acciones-rotacion + span + span {
+  margin-right: 10px;
+  font-size: 16px;
+  color: #212529;
 }
 </style>
