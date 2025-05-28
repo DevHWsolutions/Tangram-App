@@ -44,14 +44,14 @@
         :duracion="60"
         @finalizado="manejarFinJuego"
       />
-
+      <!-- 
       <div v-if="selectedShapeId" class="acciones-rotacion">
         <span class="titulo-acciones-rotacion">Acciones:</span>
         <span>Pieza:</span>
         <span>{{ selectedPieceName }}</span>
         <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
         <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
