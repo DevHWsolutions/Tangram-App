@@ -89,7 +89,7 @@ function manejarFinJuego(resultado) {
 }
 const stageSize = ref({
   width: 900,
-  height: 650,
+  height: 700,
 });
 const triangulo = ref(trianguloData);
 const userPieces = ref([
