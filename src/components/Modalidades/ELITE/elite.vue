@@ -666,15 +666,43 @@ p {
 .acciones-rotacion button {
   margin: 5px;
 }
+button {
+  padding: 10px 16px;
+  margin: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff; /* Azul fuerte para contraste */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Asegura legibilidad del texto */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
 .titulo-acciones-rotacion {
   color: var(--black-36-a-7680, #6a7680);
   text-align: center;
 
-  /* Button - Consola DEV */
-  font-family: Montserrat;
+  font-size: 18px;
+  font-weight: bold;
+  color: #343a40;
+  margin-right: 10px;
+  padding: 4px 8px;
+}
+
+.titulo-acciones-rotacion,
+.titulo-acciones-rotacion + span,
+.titulo-acciones-rotacion + span + span {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  vertical-align: middle;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.titulo-acciones-rotacion + span,
+.titulo-acciones-rotacion + span + span {
+  margin-right: 10px;
   font-size: 16px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
+  color: #212529;
 }
 </style>
