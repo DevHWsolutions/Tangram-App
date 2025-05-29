@@ -48,6 +48,7 @@
         <button @click="rotarSeleccion(45)">Girar 45° Derecha</button>
         <button @click="rotarSeleccion(-45)">Girar 45° Izquierda</button>
       </div>
+      <AlertaMensaje v-if="mostrar" :mensaje="textoAlerta" :duracion="6000" />
     </div>
   </div>
 </template>
@@ -73,6 +74,7 @@ import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "../../../BarcoMENTOR.js"; // Asegúrate de que la ruta sea correcta
 import OrdenPiezas from "../../common/OrdenPiezas.vue";
 import EstadoJuego from "../../common/EstadoJuego.vue";
+import AlertaMensaje from "../../common/AlertaMensaje.vue";
 
 const estadoJuego = ref(null);
 const bordeRojoCanvas = ref(false);
@@ -598,6 +600,8 @@ const handleStageMouseDown = (e) => {
 //     pieza.rotation = (pieza.rotation + grados) % 360;
 //   }
 // }
+const mostrar = ref(false);
+const textoAlerta = ref("");
 function rotarSeleccion(grados) {
   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
   if (!pieza || !pieza.draggable) return;
@@ -636,10 +640,14 @@ function rotarSeleccion(grados) {
   if (!seSale) {
     pieza.rotation = nuevaRotacion;
   } else {
-    // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
-    alert(
-      "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
-    );
+    // // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+    // alert(
+    //   "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
+    // );
+    textoAlerta.value =
+      " No se puede girar aquí. Intenta mover la pieza un poco antes de girarla. 👽 Pista: debajo del paralelogramo con #7 puedes apoyarte en girar tu pieza ✅";
+    mostrar.value = true;
+    setTimeout(() => (mostrar.value = false), 3000);
   }
 }
 </script>
