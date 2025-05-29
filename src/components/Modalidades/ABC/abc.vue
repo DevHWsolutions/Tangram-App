@@ -92,7 +92,7 @@
 /* Panel lateral a la derecha */
 .panel-lateral {
   /* width: 250px; */
-  width: 50%;
+  width: 250px;
   padding: 10px;
   border-left: 2px solid #ccc;
   background-color: #fff;
