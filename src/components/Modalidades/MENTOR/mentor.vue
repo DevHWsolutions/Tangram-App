@@ -53,7 +53,7 @@
   </div>
 </template>
 
-<style scoped>
+<!-- <style scoped>
 .contenedor-principal {
   outline: 2px solid red;
   border-radius: 32px;
@@ -70,6 +70,47 @@
   padding: 10px;
   border-left: 2px solid #ccc;
   /* margin-left: 5em; */
+}
+</style> -->
+
+<style scoped>
+.contenedor-principal {
+  display: flex;
+  flex-direction: row; /* panel a la izquierda */
+  border-radius: 32px;
+  background: #eff3fb;
+  margin: 5px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Panel lateral a la izquierda */
+.panel-lateral {
+  width: 200px;
+  padding: 10px;
+  border-right: 2px solid #ccc;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+/* Contenido principal */
+.contenido-central {
+  flex: 1;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .panel-lateral {
+    width: 100%;
+    border-right: none;
+    border-bottom: 2px solid #ccc;
+  }
 }
 </style>
 
