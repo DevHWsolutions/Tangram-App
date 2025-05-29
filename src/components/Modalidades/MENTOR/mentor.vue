@@ -55,17 +55,21 @@
 
 <style scoped>
 .contenedor-principal {
+  outline: 2px solid red;
   border-radius: 32px;
   background: #eff3fb;
   display: flex;
-  align-items: flex-start;
+  /* align-items: flex-start; */
   margin: 5px;
+  width: 100%;
 }
 
 .panel-lateral {
+  /* outline: 2px solid black; */
   width: 150x;
   padding: 10px;
   border-left: 2px solid #ccc;
+  /* margin-left: 5em; */
 }
 </style>
 
@@ -87,7 +91,7 @@ function manejarFinJuego(resultado) {
     location.reload(); // 👈 Esto recarga toda la página
   } else {
     alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
-    location.reload(); // 👈 Esto recarga toda la página
+    // location.reload(); // 👈 Esto recarga toda la página
   }
 }
 const stageSize = ref({
