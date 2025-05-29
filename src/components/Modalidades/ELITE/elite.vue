@@ -88,7 +88,7 @@
 
 /* Panel lateral a la derecha */
 .panel-lateral {
-  width: 250px;
+  width: 50%;
   padding: 10px;
   border-left: 2px solid #ccc;
   background-color: #fff;
@@ -705,6 +705,7 @@ p {
 }
 .acciones-rotacion {
   /* outline: 2px solid black; */
+  max-width: 250px;
   display: flex;
   flex-direction: column;
   align-items: center;
