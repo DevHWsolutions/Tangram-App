@@ -91,7 +91,8 @@
 
 /* Panel lateral a la derecha */
 .panel-lateral {
-  width: 250px;
+  /* width: 250px; */
+  width: 50%;
   padding: 10px;
   border-left: 2px solid #ccc;
   background-color: #fff;
