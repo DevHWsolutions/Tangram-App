@@ -36,7 +36,7 @@ const currentView = ref("");
 .menu {
   display: flex;
   /* margin-right: 15px;s */
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   padding: 10px;
   /* margin-right: 20px; */
 }
@@ -45,6 +45,6 @@ button {
 }
 .contenido {
   border-top: 1px solid #ccc;
-  padding-top: 20px;
+  /* padding-top: 20px; */
 }
 </style>
