@@ -1,33 +1,34 @@
 <template>
   <div class="contenedor-principal">
     <!-- Canvas a la izquierda -->
-    <v-stage
-      ref="stage"
-      :config="stageSize"
-      @mousedown="handleStageMouseDown"
-      @touchstart="handleStageMouseDown"
-    >
-      <v-layer ref="layer">
-        <!-- Piezas objetivo -->
-        <v-group
-          v-for="(templatePiece, index) in triangulo"
-          :key="templatePiece.id"
-        >
-          <v-shape :config="getTemplateShapeConfig(templatePiece)" />
-          <v-text :config="getTemplateTextConfig(templatePiece, index + 1)" />
-        </v-group>
+    <div class="contenido-central">
+      <v-stage
+        ref="stage"
+        :config="stageSize"
+        @mousedown="handleStageMouseDown"
+        @touchstart="handleStageMouseDown"
+      >
+        <v-layer ref="layer">
+          <!-- Piezas objetivo -->
+          <v-group
+            v-for="(templatePiece, index) in triangulo"
+            :key="templatePiece.id"
+          >
+            <v-shape :config="getTemplateShapeConfig(templatePiece)" />
+            <v-text :config="getTemplateTextConfig(templatePiece, index + 1)" />
+          </v-group>
 
-        <!-- Piezas del usuario -->
-        <v-shape
-          v-for="piece in userPieces"
-          :key="piece.id"
-          :config="getUserShapeConfig(piece)"
-          @dragend="handleDragEnd"
-          @dragmove="handleDragMove"
-        />
-      </v-layer>
-    </v-stage>
-
+          <!-- Piezas del usuario -->
+          <v-shape
+            v-for="piece in userPieces"
+            :key="piece.id"
+            :config="getUserShapeConfig(piece)"
+            @dragend="handleDragEnd"
+            @dragmove="handleDragMove"
+          />
+        </v-layer>
+      </v-stage>
+    </div>
     <!-- Info a la derecha -->
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
@@ -52,7 +53,7 @@
   </div>
 </template>
 
-<style scoped>
+<!-- <style scoped>
 .contenedor-principal {
   border-radius: 32px;
   background: #eff3fb;
@@ -66,8 +67,47 @@
   padding: 10px;
   border-left: 2px solid #ccc;
 }
-</style>
+</style> -->
+<style scoped>
+.contenedor-principal {
+  display: flex;
+  flex-direction: row; /* Contenido a la izquierda, panel a la derecha */
+  border-radius: 32px;
+  background: #eff3fb;
+  margin: 5px;
+  width: 100%;
+  flex-wrap: wrap;
+}
 
+/* Contenido principal a la izquierda */
+.contenido-central {
+  flex: 1;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Panel lateral a la derecha */
+.panel-lateral {
+  width: 250px;
+  padding: 10px;
+  border-left: 2px solid #ccc;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .panel-lateral {
+    width: 100%;
+    border-left: none;
+    border-top: 2px solid #ccc;
+  }
+}
+</style>
 <script setup>
 import { ref, computed } from "vue";
 import { triangulo as trianguloData } from "../../../CamelloELITE.js"; // Asegúrate de que la ruta sea correcta

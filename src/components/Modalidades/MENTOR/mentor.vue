@@ -1,33 +1,34 @@
 <template>
   <div class="contenedor-principal">
     <!-- Canvas a la izquierda -->
-    <v-stage
-      ref="stage"
-      :config="stageSize"
-      @mousedown="handleStageMouseDown"
-      @touchstart="handleStageMouseDown"
-    >
-      <v-layer ref="layer">
-        <!-- Piezas objetivo -->
-        <v-group
-          v-for="(templatePiece, index) in triangulo"
-          :key="templatePiece.id"
-        >
-          <v-shape :config="getTemplateShapeConfig(templatePiece)" />
-          <v-text :config="getTemplateTextConfig(templatePiece, index + 1)" />
-        </v-group>
+    <div class="contenido-central">
+      <v-stage
+        ref="stage"
+        :config="stageSize"
+        @mousedown="handleStageMouseDown"
+        @touchstart="handleStageMouseDown"
+      >
+        <v-layer ref="layer">
+          <!-- Piezas objetivo -->
+          <v-group
+            v-for="(templatePiece, index) in triangulo"
+            :key="templatePiece.id"
+          >
+            <v-shape :config="getTemplateShapeConfig(templatePiece)" />
+            <v-text :config="getTemplateTextConfig(templatePiece, index + 1)" />
+          </v-group>
 
-        <!-- Piezas del usuario -->
-        <v-shape
-          v-for="piece in userPieces"
-          :key="piece.id"
-          :config="getUserShapeConfig(piece)"
-          @dragend="handleDragEnd"
-          @dragmove="handleDragMove"
-        />
-      </v-layer>
-    </v-stage>
-
+          <!-- Piezas del usuario -->
+          <v-shape
+            v-for="piece in userPieces"
+            :key="piece.id"
+            :config="getUserShapeConfig(piece)"
+            @dragend="handleDragEnd"
+            @dragmove="handleDragMove"
+          />
+        </v-layer>
+      </v-stage>
+    </div>
     <!-- Info a la derecha -->
     <div class="panel-lateral">
       <p>Piezas correctas: {{ correctPiecesCount }} / {{ triangulo.length }}</p>
@@ -76,7 +77,7 @@
 <style scoped>
 .contenedor-principal {
   display: flex;
-  flex-direction: row; /* panel a la izquierda */
+  flex-direction: row; /* Contenido a la izquierda, panel a la derecha */
   border-radius: 32px;
   background: #eff3fb;
   margin: 5px;
@@ -84,19 +85,19 @@
   flex-wrap: wrap;
 }
 
-/* Panel lateral a la izquierda */
-.panel-lateral {
-  width: 200px;
-  padding: 10px;
-  border-right: 2px solid #ccc;
-  background-color: #fff;
-  box-sizing: border-box;
-}
-
-/* Contenido principal */
+/* Contenido principal a la izquierda */
 .contenido-central {
   flex: 1;
   padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Panel lateral a la derecha */
+.panel-lateral {
+  width: 250px;
+  padding: 10px;
+  border-left: 2px solid #ccc;
+  background-color: #fff;
   box-sizing: border-box;
 }
 
@@ -108,8 +109,8 @@
 
   .panel-lateral {
     width: 100%;
-    border-right: none;
-    border-bottom: 2px solid #ccc;
+    border-left: none;
+    border-top: 2px solid #ccc;
   }
 }
 </style>
@@ -132,7 +133,7 @@ function manejarFinJuego(resultado) {
     location.reload(); // 👈 Esto recarga toda la página
   } else {
     alert("Lo siento, no alcanzaste el 60% de piezas correctas.");
-    // location.reload(); // 👈 Esto recarga toda la página
+    location.reload(); // 👈 Esto recarga toda la página
   }
 }
 const stageSize = ref({
