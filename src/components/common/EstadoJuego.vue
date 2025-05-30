@@ -69,9 +69,9 @@ defineExpose({ perderIntento });
 
 <style scoped>
 .estado-juego {
-  max-width: 250px;
-  border: 1px solid #999;
-  padding: 10px;
+  /* max-width: 250px;s */
+  /* border: 1px solid #999; */
+  padding: 15px;
   margin-top: 20px;
   font-family: Arial, sans-serif;
 }
