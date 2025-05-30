@@ -81,14 +81,14 @@
   border-radius: 32px;
   background: #eff3fb;
   margin: 5px;
-  width: 100%;
-  flex-wrap: wrap;
+  /* width: 100%;
+  flex-wrap: wrap; */
 }
 
 /* Contenido principal a la izquierda */
 .contenido-central {
   flex: 1;
-  padding: 10px;
+  padding: 5px;
   box-sizing: border-box;
 }
 

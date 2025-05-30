@@ -75,8 +75,8 @@
   border-radius: 32px;
   background: #eff3fb;
   margin: 5px;
-  width: 100%;
-  flex-wrap: wrap;
+  /* width: 100%; */
+  /* flex-wrap: wrap; */
 }
 
 /* Contenido principal a la izquierda */
@@ -89,7 +89,7 @@
 /* Panel lateral a la derecha */
 .panel-lateral {
   width: 250px;
-  padding: 10px;
+  padding: 5px;
   border-left: 2px solid #ccc;
   background-color: #fff;
   box-sizing: border-box;
@@ -98,10 +98,12 @@
 /* Responsive para pantallas pequeñas */
 @media (max-width: 768px) {
   .contenedor-principal {
+    /* outline: 2px solid red; */
     flex-direction: column;
   }
 
   .panel-lateral {
+    background-color: papayawhip;
     width: 100%;
     border-left: none;
     border-top: 2px solid #ccc;
