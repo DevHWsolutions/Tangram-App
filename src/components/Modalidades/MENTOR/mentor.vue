@@ -654,13 +654,64 @@ const handleStageMouseDown = (e) => {
 // }
 const mostrar = ref(false);
 const textoAlerta = ref("");
+// function rotarSeleccion(grados) {
+//   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+//   if (!pieza || !pieza.draggable) return;
+
+//   const nuevaRotacion = (pieza.rotation + grados) % 360;
+//   const angleRad = nuevaRotacion * (Math.PI / 180);
+
+//   const stageWidth = stageSize.value.width;
+//   const stageHeight = stageSize.value.height;
+
+//   let seSale = false;
+
+//   for (let i = 0; i < pieza.points.length; i += 2) {
+//     const px = pieza.points[i];
+//     const py = pieza.points[i + 1];
+
+//     // aplicar rotación a cada punto
+//     const rotatedX = px * Math.cos(angleRad) - py * Math.sin(angleRad);
+//     const rotatedY = px * Math.sin(angleRad) + py * Math.cos(angleRad);
+
+//     // trasladar al mundo real (posición actual de la pieza)
+//     const worldX = rotatedX + pieza.x;
+//     const worldY = rotatedY + pieza.y;
+
+//     if (
+//       worldX < 0 ||
+//       worldX > stageWidth ||
+//       worldY < 0 ||
+//       worldY > stageHeight
+//     ) {
+//       seSale = true;
+//       break;
+//     }
+//   }
+
+//   if (!seSale) {
+//     pieza.rotation = nuevaRotacion;
+//   } else {
+//     // // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+//     // alert(
+//     //   "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
+//     // );
+//     textoAlerta.value =
+//       " No se puede girar aquí. Intenta mover la pieza un poco antes de girarla. 👽 Pista: debajo del paralelogramo con #7 puedes apoyarte en girar tu pieza ✅";
+//     mostrar.value = true;
+//     setTimeout(() => (mostrar.value = false), 3000);
+//   }
+// }
 function rotarSeleccion(grados) {
   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
   if (!pieza || !pieza.draggable) return;
 
+  const rotacionAnterior = pieza.rotation;
   const nuevaRotacion = (pieza.rotation + grados) % 360;
-  const angleRad = nuevaRotacion * (Math.PI / 180);
+  pieza.rotation = nuevaRotacion; // Se aplica temporalmente para que se vea visualmente
 
+  // Validar si la nueva rotación hace que se salga
+  const angleRad = nuevaRotacion * (Math.PI / 180);
   const stageWidth = stageSize.value.width;
   const stageHeight = stageSize.value.height;
 
@@ -670,11 +721,9 @@ function rotarSeleccion(grados) {
     const px = pieza.points[i];
     const py = pieza.points[i + 1];
 
-    // aplicar rotación a cada punto
     const rotatedX = px * Math.cos(angleRad) - py * Math.sin(angleRad);
     const rotatedY = px * Math.sin(angleRad) + py * Math.cos(angleRad);
 
-    // trasladar al mundo real (posición actual de la pieza)
     const worldX = rotatedX + pieza.x;
     const worldY = rotatedY + pieza.y;
 
@@ -689,17 +738,11 @@ function rotarSeleccion(grados) {
     }
   }
 
-  if (!seSale) {
-    pieza.rotation = nuevaRotacion;
-  } else {
-    // // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
-    // alert(
-    //   "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
-    // );
-    textoAlerta.value =
-      " No se puede girar aquí. Intenta mover la pieza un poco antes de girarla. 👽 Pista: debajo del paralelogramo con #7 puedes apoyarte en girar tu pieza ✅";
-    mostrar.value = true;
-    setTimeout(() => (mostrar.value = false), 3000);
+  if (seSale) {
+    // 🔁 Revertimos a la rotación anterior después de un pequeño retraso visual
+    setTimeout(() => {
+      pieza.rotation = rotacionAnterior;
+    }, 200); // Pequeña pausa para que se note que rotó y se corrigió
   }
 }
 </script>
