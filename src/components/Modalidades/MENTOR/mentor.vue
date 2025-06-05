@@ -451,29 +451,35 @@ const handleDragEnd = (e) => {
     if (!pieza || !guia || pieza.points.length !== guia.points.length)
       return false;
 
-    for (let i = 0; i < pieza.points.length; i += 2) {
-      const [px, py] = [pieza.points[i], pieza.points[i + 1]];
-      const anglePieza = pieza.rotation * (Math.PI / 180);
-      const rotadoXP = px * Math.cos(anglePieza) - py * Math.sin(anglePieza);
-      const rotadoYP = px * Math.sin(anglePieza) + py * Math.cos(anglePieza);
-      const worldXP = rotadoXP + pieza.x;
-      const worldYP = rotadoYP + pieza.y;
+    const transformarPuntos = (obj) => {
+      const puntosTransformados = [];
+      const angle = obj.rotation * (Math.PI / 180);
 
-      const [gx, gy] = [guia.points[i], guia.points[i + 1]];
-      const angleGuia = guia.rotation * (Math.PI / 180);
-      const rotadoXG = gx * Math.cos(angleGuia) - gy * Math.sin(angleGuia);
-      const rotadoYG = gx * Math.sin(angleGuia) + gy * Math.cos(angleGuia);
-      const worldXG = rotadoXG + guia.x;
-      const worldYG = rotadoYG + guia.y;
+      for (let i = 0; i < obj.points.length; i += 2) {
+        const px = obj.points[i];
+        const py = obj.points[i + 1];
+        const rotadoX = px * Math.cos(angle) - py * Math.sin(angle);
+        const rotadoY = px * Math.sin(angle) + py * Math.cos(angle);
+        const worldX = rotadoX + obj.x;
+        const worldY = rotadoY + obj.y;
+        puntosTransformados.push({ x: worldX, y: worldY });
+      }
 
-      const dx = worldXP - worldXG;
-      const dy = worldYP - worldYG;
-      const distancia = Math.sqrt(dx * dx + dy * dy);
+      return puntosTransformados;
+    };
 
-      if (distancia > tolerancia) return false;
-    }
+    const puntosPieza = transformarPuntos(pieza);
+    const puntosGuia = transformarPuntos(guia);
 
-    return true;
+    // Para cada punto de la pieza, debe haber al menos un punto de la guía cercano
+    return puntosPieza.every((puntoPieza) => {
+      return puntosGuia.some((puntoGuia) => {
+        const dx = puntoPieza.x - puntoGuia.x;
+        const dy = puntoPieza.y - puntoGuia.y;
+        const distancia = Math.sqrt(dx * dx + dy * dy);
+        return distancia <= tolerancia;
+      });
+    });
   };
 
   const esCorrecta = puntosCoinciden(draggedPiece, guidePiece);
@@ -485,13 +491,13 @@ const handleDragEnd = (e) => {
 
     draggedPiece.x = guidePiece.x;
     draggedPiece.y = guidePiece.y;
-    draggedPiece.rotation = guidePiece.rotation;
+    draggedPiece.rotation = guidePiece.rotation; // En teoria evitamos que rote
     draggedPiece.draggable = false;
 
     e.target.to({
       x: guidePiece.x,
       y: guidePiece.y,
-      rotation: guidePiece.rotation,
+      rotation: guidePiece.rotation, //En teoria evitamos que rote
       duration: 0.4,
       easing: Konva.Easings.EaseInOut,
     });
@@ -648,13 +654,64 @@ const handleStageMouseDown = (e) => {
 // }
 const mostrar = ref(false);
 const textoAlerta = ref("");
+// function rotarSeleccion(grados) {
+//   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
+//   if (!pieza || !pieza.draggable) return;
+
+//   const nuevaRotacion = (pieza.rotation + grados) % 360;
+//   const angleRad = nuevaRotacion * (Math.PI / 180);
+
+//   const stageWidth = stageSize.value.width;
+//   const stageHeight = stageSize.value.height;
+
+//   let seSale = false;
+
+//   for (let i = 0; i < pieza.points.length; i += 2) {
+//     const px = pieza.points[i];
+//     const py = pieza.points[i + 1];
+
+//     // aplicar rotación a cada punto
+//     const rotatedX = px * Math.cos(angleRad) - py * Math.sin(angleRad);
+//     const rotatedY = px * Math.sin(angleRad) + py * Math.cos(angleRad);
+
+//     // trasladar al mundo real (posición actual de la pieza)
+//     const worldX = rotatedX + pieza.x;
+//     const worldY = rotatedY + pieza.y;
+
+//     if (
+//       worldX < 0 ||
+//       worldX > stageWidth ||
+//       worldY < 0 ||
+//       worldY > stageHeight
+//     ) {
+//       seSale = true;
+//       break;
+//     }
+//   }
+
+//   if (!seSale) {
+//     pieza.rotation = nuevaRotacion;
+//   } else {
+//     // // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
+//     // alert(
+//     //   "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
+//     // );
+//     textoAlerta.value =
+//       " No se puede girar aquí. Intenta mover la pieza un poco antes de girarla. 👽 Pista: debajo del paralelogramo con #7 puedes apoyarte en girar tu pieza ✅";
+//     mostrar.value = true;
+//     setTimeout(() => (mostrar.value = false), 3000);
+//   }
+// }
 function rotarSeleccion(grados) {
   const pieza = userPieces.value.find((p) => p.id === selectedShapeId.value);
   if (!pieza || !pieza.draggable) return;
 
+  const rotacionAnterior = pieza.rotation;
   const nuevaRotacion = (pieza.rotation + grados) % 360;
-  const angleRad = nuevaRotacion * (Math.PI / 180);
+  pieza.rotation = nuevaRotacion; // Se aplica temporalmente para que se vea visualmente
 
+  // Validar si la nueva rotación hace que se salga
+  const angleRad = nuevaRotacion * (Math.PI / 180);
   const stageWidth = stageSize.value.width;
   const stageHeight = stageSize.value.height;
 
@@ -664,11 +721,9 @@ function rotarSeleccion(grados) {
     const px = pieza.points[i];
     const py = pieza.points[i + 1];
 
-    // aplicar rotación a cada punto
     const rotatedX = px * Math.cos(angleRad) - py * Math.sin(angleRad);
     const rotatedY = px * Math.sin(angleRad) + py * Math.cos(angleRad);
 
-    // trasladar al mundo real (posición actual de la pieza)
     const worldX = rotatedX + pieza.x;
     const worldY = rotatedY + pieza.y;
 
@@ -683,17 +738,11 @@ function rotarSeleccion(grados) {
     }
   }
 
-  if (!seSale) {
-    pieza.rotation = nuevaRotacion;
-  } else {
-    // // console.log("❌ No se puede rotar: la pieza se saldría del canvas.");
-    // alert(
-    //   "⚠️ No se puede girar aquí. Intenta mover la pieza un poco antes de girarla., Pista debajo del paralogramo con #7 puedes apoyarte en girar tu pieza ✅"
-    // );
-    textoAlerta.value =
-      " No se puede girar aquí. Intenta mover la pieza un poco antes de girarla. 👽 Pista: debajo del paralelogramo con #7 puedes apoyarte en girar tu pieza ✅";
-    mostrar.value = true;
-    setTimeout(() => (mostrar.value = false), 3000);
+  if (seSale) {
+    // 🔁 Revertimos a la rotación anterior después de un pequeño retraso visual
+    setTimeout(() => {
+      pieza.rotation = rotacionAnterior;
+    }, 200); // Pequeña pausa para que se note que rotó y se corrigió
   }
 }
 </script>
