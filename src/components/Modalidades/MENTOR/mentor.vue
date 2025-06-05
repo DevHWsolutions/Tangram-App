@@ -451,29 +451,35 @@ const handleDragEnd = (e) => {
     if (!pieza || !guia || pieza.points.length !== guia.points.length)
       return false;
 
-    for (let i = 0; i < pieza.points.length; i += 2) {
-      const [px, py] = [pieza.points[i], pieza.points[i + 1]];
-      const anglePieza = pieza.rotation * (Math.PI / 180);
-      const rotadoXP = px * Math.cos(anglePieza) - py * Math.sin(anglePieza);
-      const rotadoYP = px * Math.sin(anglePieza) + py * Math.cos(anglePieza);
-      const worldXP = rotadoXP + pieza.x;
-      const worldYP = rotadoYP + pieza.y;
+    const transformarPuntos = (obj) => {
+      const puntosTransformados = [];
+      const angle = obj.rotation * (Math.PI / 180);
 
-      const [gx, gy] = [guia.points[i], guia.points[i + 1]];
-      const angleGuia = guia.rotation * (Math.PI / 180);
-      const rotadoXG = gx * Math.cos(angleGuia) - gy * Math.sin(angleGuia);
-      const rotadoYG = gx * Math.sin(angleGuia) + gy * Math.cos(angleGuia);
-      const worldXG = rotadoXG + guia.x;
-      const worldYG = rotadoYG + guia.y;
+      for (let i = 0; i < obj.points.length; i += 2) {
+        const px = obj.points[i];
+        const py = obj.points[i + 1];
+        const rotadoX = px * Math.cos(angle) - py * Math.sin(angle);
+        const rotadoY = px * Math.sin(angle) + py * Math.cos(angle);
+        const worldX = rotadoX + obj.x;
+        const worldY = rotadoY + obj.y;
+        puntosTransformados.push({ x: worldX, y: worldY });
+      }
 
-      const dx = worldXP - worldXG;
-      const dy = worldYP - worldYG;
-      const distancia = Math.sqrt(dx * dx + dy * dy);
+      return puntosTransformados;
+    };
 
-      if (distancia > tolerancia) return false;
-    }
+    const puntosPieza = transformarPuntos(pieza);
+    const puntosGuia = transformarPuntos(guia);
 
-    return true;
+    // Para cada punto de la pieza, debe haber al menos un punto de la guía cercano
+    return puntosPieza.every((puntoPieza) => {
+      return puntosGuia.some((puntoGuia) => {
+        const dx = puntoPieza.x - puntoGuia.x;
+        const dy = puntoPieza.y - puntoGuia.y;
+        const distancia = Math.sqrt(dx * dx + dy * dy);
+        return distancia <= tolerancia;
+      });
+    });
   };
 
   const esCorrecta = puntosCoinciden(draggedPiece, guidePiece);
@@ -485,13 +491,13 @@ const handleDragEnd = (e) => {
 
     draggedPiece.x = guidePiece.x;
     draggedPiece.y = guidePiece.y;
-    draggedPiece.rotation = guidePiece.rotation;
+    draggedPiece.rotation = guidePiece.rotation; // En teoria evitamos que rote
     draggedPiece.draggable = false;
 
     e.target.to({
       x: guidePiece.x,
       y: guidePiece.y,
-      rotation: guidePiece.rotation,
+      rotation: guidePiece.rotation, //En teoria evitamos que rote
       duration: 0.4,
       easing: Konva.Easings.EaseInOut,
     });
